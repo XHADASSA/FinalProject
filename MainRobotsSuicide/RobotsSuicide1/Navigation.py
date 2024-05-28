@@ -1,6 +1,9 @@
 import time
 import math
 import camera as cm
+from flask import Flask, request, jsonify
+import requests
+
 #from newP.ArrayPoint import FindArrayPoint
 wavelength = 5  # אורך גל הקול
 #בתהליך זה קיים מצפן, התהליך דוגם ממנו נתונים בעת הצןרך למשתנה current_angle
@@ -9,13 +12,10 @@ speed=100
 #דגימה למצפן
 current_angle = 90
 
-def process_2(GPS,destination_point, stop_flag):
-    # הגדרת מיקום הרובוט הנוכחי
-    current_position = [1.0, 2.0, 0.0]  # (x, y, z)
-
-    # הגדרת נקודת המטרה
-    goal_position = [5.0, 4.0, 1.0]  # (x, y, z)
-
+#התהליך מקבל את מיקום הרובוט המתאבד ע"י חיישן GPS ונקודה מטרה שם המוקש נמצא. התהליך אחראי על הניווט למוקש
+def process_2(goal_position):
+    #קריאת נתוני חיישן הGPS מקובץ
+    current_position=[0,0]
     # חישוב המרחק לנקודת המטרה
     distance_to_goal = math.sqrt((goal_position[0] - current_position[0]) ** 2 +
                                  (goal_position[1] - current_position[1]) ** 2 +
@@ -44,3 +44,8 @@ def process_2(GPS,destination_point, stop_flag):
     image_path = cm.camera()
 
     # שליחת הנתיב לשרת הראשי
+    response = requests.post("http://localhost:3001/Main-robot", json=image_path)
+    if response.status_code == 200:
+        return jsonify({"message": "Request successful"})
+    else:
+        return jsonify({"message": "Request failed"})

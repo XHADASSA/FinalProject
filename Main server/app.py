@@ -1,13 +1,12 @@
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
-from ArrayPoint import FindArrayPoint
-#import MainRobotsSuicide.RobotsSuicide1.main_multiprocessing as mm
+from FindArrayPoint import FindPoints
+import MainRobotsSuicide.RobotsSuicide1.main_multiprocessing as mm
 
 app = Flask(__name__)
 CORS(app);
 status=False
-
 
 @app.route('/python-status', methods=['get'])
 def getStatus():
@@ -21,7 +20,7 @@ def updatePoint():
     waypoint = {"latitude": 0.000139, "longitude": 0.000279}
     return jsonify(waypoint)
 
-# Endpoint for handling incoming requests from the React client
+# לקוח ריאקט שולח לו מערך נקודות והוא מחזיר את המערך מעובד ללקוח
 @app.route('/python-endpoint', methods=['POST'])
 def handle_markers():
     print("The client runs successfully...")
@@ -31,7 +30,7 @@ def handle_markers():
     success = True
     dataArray=[[int(point['x']), int(point['y'])] for point in data]
     print(dataArray)
-    ArrayPoint=FindArrayPoint([0,0],data)
+    ArrayPoint=FindPoints([0,0],data)
     response_data = {
         'success': success,
         'points': ArrayPoint
@@ -39,14 +38,20 @@ def handle_markers():
     return jsonify(response_data)
 
 # האזנה לבקשות משרת הרובוטים המתאבדים ושליחת בקשות אליו
+
+#קבלת נקודת מוקש מהרובוט הראשי והרצת תוכנת הרובוט המתאבד עם הנתון שהתקבל
+
 @app.route('/Main-Robots-suicide', methods=['POST'])
 def handle_Main_Robots_suicide():
-    data = request.get_json()
-    print(f"Main-Robots-suicide {data}")
+    point = request.get_json()
+    print(f"the position of main {point}")
     #הרצת תוכנת הרובוט המתאבד
+    mm.main_multiprocessing_of_robot_suicide(point)
     return {'message': 'Received request from Main Robots-suicide'}
 
 # האזנה לבקשות מהרובוט הראשי ושליחת בקשות אליו
+
+
 @app.route('/Main-robot', methods=['POST'])
 def handle_Main_robot():
     data = request.get_json()

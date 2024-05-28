@@ -8,6 +8,7 @@ polygon_vertices = [
     [20, 42],
     [40, 20]
     ]
+
 # Maximum allowed distance from the boundary of the polygon
 tolerance_distance = 0  # in meters
 wavelength = 2  # אורך גל הקול
