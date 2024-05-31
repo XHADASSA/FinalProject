@@ -1,25 +1,45 @@
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
-from FindArrayPoint import FindPoints
-import MainRobotsSuicide.RobotsSuicide1.main_multiprocessing as mm
+from MainRobotsSuicide.RobotsSuicide1.main_multiprocessing import main_multiprocessing_of_robot_suicide
+from MainRobot.Multiprocessing.main_multiprocessing import multiprocessNavigationInArea
+import variables as vl
+import MainServer.global_state as global_state  # יבוא מודול ניהול מצב
+import os
 
 app = Flask(__name__)
 CORS(app);
 status=False
+wavelength=vl.read_wavelength_for_exel('../data.xlsx')
+
 
 @app.route('/python-status', methods=['get'])
 def getStatus():
-    #if status==False:
-    #    status=True
-    #    return True
     return False
 
 @app.route('/getWaypoint', methods=['GET'])
 def updatePoint():
-    waypoint = {"latitude": 0.000139, "longitude": 0.000279}
-    return jsonify(waypoint)
+    file_path = '../data.xlsx'
+    if not os.path.exists(file_path):
+        return jsonify({"error": "File not found"}), 404
 
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            if not lines:
+                return jsonify({"error": "File is empty"}), 404
+
+            last_line = lines[-1].strip()
+            data = last_line.split()
+            latitude = float(data[0])
+            longitude = float(data[1])
+
+            waypoint = {"latitude": latitude, "longitude": longitude}
+            return jsonify(waypoint)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+dataArray=None
 # לקוח ריאקט שולח לו מערך נקודות והוא מחזיר את המערך מעובד ללקוח
 @app.route('/python-endpoint', methods=['POST'])
 def handle_markers():
@@ -28,13 +48,17 @@ def handle_markers():
     print("the array is checked...")
     print(f'the tada{data}')
     success = True
-    dataArray=[[int(point['x']), int(point['y'])] for point in data]
-    print(dataArray)
-    ArrayPoint=FindPoints([0,0],data)
+    global_state.dataArray=[[int(point['x']), int(point['y'])] for point in data]
+    print(global_state.dataArray)
+
+    from MainServer.FindArrayPoint import FindPoints
+    global_state.ArrayPoint1,global_state.ArrayPoint2=FindPoints(global_state.dataArray,[0,0],wavelength)
     response_data = {
         'success': success,
-        'points': ArrayPoint
+        'points1': global_state.ArrayPoint1,
+        'points2': global_state.ArrayPoint2
     }
+    multiprocessNavigationInArea(global_state.dataArray,global_state.ArrayPoint1, global_state.ArrayPoint2)
     return jsonify(response_data)
 
 # האזנה לבקשות משרת הרובוטים המתאבדים ושליחת בקשות אליו
@@ -46,7 +70,7 @@ def handle_Main_Robots_suicide():
     point = request.get_json()
     print(f"the position of main {point}")
     #הרצת תוכנת הרובוט המתאבד
-    mm.main_multiprocessing_of_robot_suicide(point)
+    main_multiprocessing_of_robot_suicide(point)
     return {'message': 'Received request from Main Robots-suicide'}
 
 # האזנה לבקשות מהרובוט הראשי ושליחת בקשות אליו
@@ -61,5 +85,7 @@ def handle_Main_robot():
     else:
         return jsonify({"message": "Request failed"})
 
+
 if __name__ == '__main__':
     app.run(host='localhost', port=3001)
+

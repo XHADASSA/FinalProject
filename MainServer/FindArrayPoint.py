@@ -7,10 +7,10 @@ polygon_vertices = [
     [40, 10],
     [50, -20],
     [30, -40]
-    # Add more vertices as needed
 ]
+
+
 GPS = [30, -39]
-CameraView = 2
 
 #פונקציה המקבלת 2 נקודות ו2 מרחקים ומוצאת את הנקודה ביניהם על הישר
 def FindAndSolvePoint(point1,k,point2,l):
@@ -99,11 +99,6 @@ def find_line_equation(point1, point2):
 
 
 def calculate_sides(perpendicular_length, given_angle):
-    # Calculate the base side using tangent
-    # base_length = perpendicular_length * math.tan(math.radians(given_angle))
-
-    # Calculate the hypotenuse using Pythagorean theorem
-    # hypotenuse_length = math.sqrt(perpendicular_length ** 2 + base_length ** 2)
     hypotenuse_length = perpendicular_length / math.cos(math.radians(given_angle))
     return hypotenuse_length
 
@@ -160,12 +155,11 @@ def Calculate_points_on_sides(line_equation, dis, point1, point2, point3, point4
 
 
 def FindPointOnLine(point1, point2, distance_between_points):
-    # print(point1,point2,distance_between_points)
     x1 = point1[0]
     y1 = point1[1]
     x2 = point2[0]
     y2 = point2[1]
-    # ArrayPoints=[]
+
     d = distance1(x1, y1, x2, y2)
 
     i = 1
@@ -174,7 +168,7 @@ def FindPointOnLine(point1, point2, distance_between_points):
 
     return point
 
-def FindPoints(polygon_vertices, GPS, CameraView):
+def FindPoints(polygon_vertices, GPS, wavelength):
     # מציאת משוואת המקביל
     IStartPoint = largest_side_length(polygon_vertices, GPS=GPS)
     n = len(polygon_vertices)
@@ -190,7 +184,7 @@ def FindPoints(polygon_vertices, GPS, CameraView):
     angle = abs(calculate_angle(line_equation2, line_equation1))
     if angle > 90: angle = angle - 90
     # חישוב היתר שישמש למרחק בין הנקודות
-    dictunasion = calculate_sides(CameraView, angle)
+    dictunasion = calculate_sides(wavelength, angle)
     # מציאת נקודה על הישר של המקביל
     p = FindPointOnLine(polygon_vertices[(IStartPoint + 1) % n], polygon_vertices[(IStartPoint + 2) % n],dictunasion)
 
@@ -242,12 +236,12 @@ def FindPoints(polygon_vertices, GPS, CameraView):
 
     return ArrayPoint1, ArrayPoint2
 
-first_part = queue.Queue()
-second_part = queue.Queue()
-first_part, second_part = FindPoints(polygon_vertices, GPS, CameraView)
-
-while not first_part.empty():
-    print(first_part.get())
-print("---")
-while not second_part.empty():
-    print(second_part.get())
+#first_part = queue.Queue()
+#second_part = queue.Queue()
+#first_part, second_part = FindPoints(polygon_vertices, GPS, CameraView)
+#
+#while not first_part.empty():
+#    print(first_part.get())
+#print("---")
+#while not second_part.empty():
+#    print(second_part.get())

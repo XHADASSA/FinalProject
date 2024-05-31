@@ -1,18 +1,16 @@
 import time
 import Function as f
-#from newP.ArrayPoint import FindArrayPoint
-wavelength = 1.5  # אורך גל הקול
+import variables as vl
 #בתהליך זה קיים מצפן, התהליך דוגם ממנו נתונים בעת הצןרך למשתנה current_angle
 
-speed=100
 #דגימה למצפן
-current_angle = 90
+current_angle = vl.read_compass_for_exel('../../data.xlsx')
 
-def process_2(GPS,polygon_vertices, stop_flag):
+def process_2(GPS,polygon_vertices,ArrayPoint1,ArrayPoint2, stop_flag):
     print("Navigation procces")
     print(f"the point un process 2 is, {GPS}")
     #הובלת הרובוט לנקודת ההתחלה
-    point=polygon_vertices[0]
+    point=ArrayPoint1[0]
     StartPoint = f.FindPoint(point)
     #חישוב המרחק בין המיקום הנוכחי של הרובוט לבין נקודת ההתחלה של הסריקה
     distance = f.calculate_distance(GPS[0], GPS[1], StartPoint[0], StartPoint[1])
@@ -20,15 +18,20 @@ def process_2(GPS,polygon_vertices, stop_flag):
     steering_angle = f.calculate_steering_angle(current_angle, GPS, StartPoint)
     current_point=GPS
     destination_point=StartPoint
-    while True:
+    flag_Array=1
+    i=0
+    while (i-1)< len(max(ArrayPoint1,ArrayPoint2)):
+        #סיבוב
         print(f"stop_flag {stop_flag}")
         print(f"סע מנקודה {current_point} בזווית {steering_angle} לנקודה {destination_point}")
         #לולאת המתנה שהרובוט יגיע ליעדו שנמצא מחוץ לשטח
-        while f.check_distance(current_point, destination_point,10)==False and stop_flag:
+        while f.check_distance(current_point, destination_point,10)==False and stop_flag==0:
             print("הרובוט מתקדם לנקודה הבאה")
         print("הרובוט הגיע ליעדו")
 
-        destination_point =polygon_vertices[i]
+        #היפוך הדגל
+        flag_Array=3-flag_Array
+        destination_point=ArrayPoint1[i] if flag_Array==1 else ArrayPoint2[i]
         # חישוב זווית היגוי בין מיקום הרובוט לנקודת היעד
         steering_angle = f.calculate_steering_angle(steering_angle, current_point, destination_point)
         print(f"סע מנקודה {current_point} בזווית {steering_angle} לנקודה {destination_point}")
@@ -38,3 +41,5 @@ def process_2(GPS,polygon_vertices, stop_flag):
             print("התקדם ישר")
             time.sleep(1)
         time.sleep(2)
+        destination_point=ArrayPoint1[i+1] if flag_Array==1 else ArrayPoint2[i+1]
+        i+=1

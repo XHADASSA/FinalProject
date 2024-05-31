@@ -3,6 +3,7 @@ import time
 import threading
 import math
 import requests
+import variables as vl
 
 class Object:
     def __init__(self, type, signal, d, angle):
@@ -30,13 +31,13 @@ def sensor_update(i, sensor_array):
     #while True:
     for _ in range(3):
         signal = random.choices([True, False], weights=[0.3, 0.7])[0]
-        d = random.randint(0, 10000)
+        d = random.randint(0, 1000)
         type = random.choices([True, False], weights=[0.7, 0.3])[0] if signal else False
         sensor_array[i].signal = signal
         sensor_array[i].d = d
         sensor_array[i].type=type
         print(f"Process child {threading.get_ident()} - Signal: {sensor_array[i].signal}, d: {sensor_array[i].d}, angle: {sensor_array[i].angle}")
-        time.sleep(1.5)
+        time.sleep(1)
 
 #חיישן מספר 1 הוא חיישן קדמי
 #חיישן מספר 2 הוא חיישן עליון
@@ -51,9 +52,12 @@ def manager_sensor(sensor_array, stop_flag):
         if sensor_array[i].signal and i == 1:
             if sensor_array[i].type:
                 positionOfMine = CalculatingLocationMine(sensor_array[i].angle, sensor_array[i].d, [0, 0])
-                stop_flag=1
-            else:
-                stop_flag=1
+                # שליחת המיקום לשרת הראשי
+                data = {'waypoint': positionOfMine}
+                response = requests.post(server_url, json=data)
+                print(response)
+                print("נשלח מיקום עצם חשוד לשרת הראשי")
+            stop_flag=1
         #There is a mine in the area
         elif sensor_array[i].signal and sensor_array[i].type:
             #שליחת הודעה למסך כולל הנתונים של זווית, מרחק, ומיקום הרובוט
@@ -64,23 +68,28 @@ def manager_sensor(sensor_array, stop_flag):
             print(response)
             print("נשלח מיקום עצם חשוד לשרת הראשי")
     print(f"stop_flag in manager_sensor: {stop_flag}")
-    time.sleep(1.5)
+    time.sleep(1)
 
 def process_1(stop_flag):
     processes = list(range(11))
     # יצירת מערך החיישנים המשותף לכלל התהליכים
     sensor_array = [
-        Object(False, False,0, 45),
-        Object(False, False,0, 90),
-        Object(False, False,0, 30),
-        Object(False, False,0, 60),
-        Object(False, False,0, 75),
-        Object(False, False,0, 20),
-        Object(False, False,0, 55),
-        Object(False, False,0, 80),
-        Object(False, False,0, 15),
-        Object(False, False,0, 25)
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0),
+        Object(False, False,0, 0)
     ]
+
+    angle_sensors=vl.read_angle_sensors_for_exel('../../data.xlsx')
+
+    for i in range(len(angle_sensors)):
+        sensor_array[i].angle = angle_sensors[i]
 
     for obj in sensor_array:
         print(f"Signal: {obj.signal}, d: {obj.d}, angle: {obj.angle}")
@@ -97,10 +106,9 @@ def process_1(stop_flag):
 
     for p in processes:
         p.join()
-    print("סוף תהליכון")
-    for obj in sensor_array:
-        print(f"Signal: {obj.signal}, d: {obj.d}, angle: {obj.angle}, Type: {obj.type}")
-    print(f"stop flag {stop_flag}")
+    #for obj in sensor_array:
+    #    print(f"Signal: {obj.signal}, d: {obj.d}, angle: {obj.angle}, Type: {obj.type}")
+    #print(f"stop flag {stop_flag}")
 
-stop_flag=0
-process_1(stop_flag)
+#stop_flag=0
+#process_1(stop_flag)

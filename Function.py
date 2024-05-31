@@ -1,17 +1,20 @@
 import math
 from queue import Queue
+import variables
+import MainServer.global_state as global_state
 
-polygon_vertices = [
-    [34,0],
-    [0, 5],
-    [0, 40],
-    [20, 42],
-    [40, 20]
-    ]
+
+#polygon_vertices = [
+#    [34,0],
+#    [0, 5],
+#    [0, 40],
+#    [20, 42],
+#    [40, 20]
+#    ]
+
 
 # Maximum allowed distance from the boundary of the polygon
-tolerance_distance = 0  # in meters
-wavelength = 2  # אורך גל הקול
+wavelength = variables.read_wavelength_for_exel()  # אורך גל הקול
 
 def distance(x1, y1, x2, y2):
     return math.sqrt(((float(y1) - float(y2)) ** 2) + ((float(x1) - float(x2)) ** 2))
@@ -275,3 +278,47 @@ def convert_queue_to_array(queue):
         item = queue.get()
         array.append(item)
     return array
+
+
+def GPS():
+    """
+    מוצא נקודה שמחוץ לצורה סגורה
+    :param polygon: רשימת נקודות היוצרות את הצורה
+    :return: נקודה (x, y) שמחוץ לצורה
+    """
+    # הפקת קואורדינטות ה-X וה-Y מהנקודות
+    x_coords = [point[0] for point in global_state.dataArray]
+    y_coords = [point[1] for point in global_state.dataArray]
+
+    # מציאת המקסימום והמינימום של קואורדינטות ה-X וה-Y
+    min_x, max_x = min(x_coords), max(x_coords)
+    min_y, max_y = min(y_coords), max(y_coords)
+
+    # הוספת נקודה מחוץ לטווח המינימום והמקסימום כדי להבטיח שהיא מחוץ לצורה
+    outside_point = (max_x + 1, max_y + 1)
+
+    return outside_point
+
+
+def find_closest_point(target_point, points_array):
+    """
+    מוצא את הנקודה הקרובה ביותר לנקודת היעד במערך הנקודות
+
+    :param target_point: נקודת היעד, זוג ערכים (x, y)
+    :param points_array: מערך של נקודות, כל נקודה היא זוג ערכים (x, y)
+    :return: הנקודה הקרובה ביותר לנקודת היעד
+    """
+    closest_distance = float('inf')
+    i=0
+    for i in range(len(points_array)):
+        point=points_array[i]
+        d = distance(target_point[0],target_point[1],point[0],point[1])
+        if d < closest_distance:
+            closest_distance = distance
+
+    return i
+
+## דוגמה לשימוש בפונקציה
+#polygon = [(0, 0), (4, 0), (4, 3), (2, 5), (0, 3)]  # מחומש
+#outside_point = GPS()
+#print(f"The outside point is: {outside_point}")

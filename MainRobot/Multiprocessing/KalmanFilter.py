@@ -27,7 +27,7 @@ def process_3():
     gps_measurements=[]
 
     # עמדת התחלה
-    X = np.array([[0], [0]]) # מיקום ראשוני ומהירות
+    X = np.array([[0], [0]]) # initial position and speed
 
     # אי ודאות ראשונית
     P = np.array([[1000, 0], [0, 1000]])
@@ -82,4 +82,4 @@ def process_3():
 
             time.sleep(1)
 
-process_3()
+#process_3()

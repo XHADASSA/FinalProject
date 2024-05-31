@@ -1,5 +1,5 @@
 import time
-def process_5(stop_flag):
+def process_4(stop_flag):
     while True:
         stop_flag.wait()
         if stop_flag.is_set():

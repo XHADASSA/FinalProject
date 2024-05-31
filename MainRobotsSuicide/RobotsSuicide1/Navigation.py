@@ -1,6 +1,6 @@
 import time
 import math
-import camera as cm
+import MainRobotsSuicide.RobotsSuicide1.camera as cm
 from flask import Flask, request, jsonify
 import requests
 
@@ -13,7 +13,7 @@ speed=100
 current_angle = 90
 
 #התהליך מקבל את מיקום הרובוט המתאבד ע"י חיישן GPS ונקודה מטרה שם המוקש נמצא. התהליך אחראי על הניווט למוקש
-def process_2(goal_position):
+def process_2(goal_position,stop_flag):
     #קריאת נתוני חיישן הGPS מקובץ
     current_position=[0,0]
     # חישוב המרחק לנקודת המטרה
