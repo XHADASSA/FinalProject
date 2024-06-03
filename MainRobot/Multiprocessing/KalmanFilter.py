@@ -25,9 +25,9 @@ def GPS_update():
 
 def process_3():
     gps_measurements=[]
-
+    x, y, speed=GPS_update()
     # עמדת התחלה
-    X = np.array([[0], [0]]) # initial position and speed
+    X = np.array([[x,y], [speed]]) # initial position and speed
 
     # אי ודאות ראשונית
     P = np.array([[1000, 0], [0, 1000]])
@@ -46,7 +46,7 @@ def process_3():
 
     # אתחול משתנים
     I = np.eye(2)
-    gps_measurements=[]
+
     while True:
         # קריאת מיקום הרובוט מהקובץ
         gps_measurements.append(GPS_update())
@@ -71,7 +71,6 @@ def process_3():
             X = X + np.dot(K, y)
             P = np.dot((I - np.dot(K, H)), P)
 
-            # Update global variable point with the estimated position
             point = (X[0][0], X[1][0])
             print(point)
             #הוספת הדגימה לקובץ

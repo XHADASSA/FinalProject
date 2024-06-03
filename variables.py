@@ -20,13 +20,17 @@ def read_speed_for_exel():
     return speed
 
 
-def read_compass_for_exel(file_path):
+def read_compass_for_exel():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'data.xlsx')
     #קריאת אורך גל הקול מהקובץ
     df=pd.read_excel(file_path, sheet_name='CompassValues', header=None, usecols="A:A", nrows=1)
     compass=(df.iloc[:, 0].tolist())[0]
     return compass
 
-def read_angle_sensors_for_exel(file_path):
+def read_angle_sensors_for_exel():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'data.xlsx')
     # קריאת הנתונים מקובץ האקסל
     sheet_name = 'AngleSensors'
 

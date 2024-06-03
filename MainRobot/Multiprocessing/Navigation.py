@@ -1,17 +1,20 @@
 import time
 import Function as f
 import variables as vl
+import MainRobot.Multiprocessing.KalmanFilter as KalmanFilter
+
+
 #בתהליך זה קיים מצפן, התהליך דוגם ממנו נתונים בעת הצןרך למשתנה current_angle
 
 #דגימה למצפן
-current_angle = vl.read_compass_for_exel('../../data.xlsx')
+current_angle = vl.read_compass_for_exel()
 
 def process_2(GPS,polygon_vertices,ArrayPoint1,ArrayPoint2, stop_flag):
     print("Navigation procces")
     print(f"the point un process 2 is, {GPS}")
     #הובלת הרובוט לנקודת ההתחלה
     point=ArrayPoint1[0]
-    StartPoint = f.FindPoint(point)
+    StartPoint = f.FindPoint(point,polygon_vertices)
     #חישוב המרחק בין המיקום הנוכחי של הרובוט לבין נקודת ההתחלה של הסריקה
     distance = f.calculate_distance(GPS[0], GPS[1], StartPoint[0], StartPoint[1])
     ## חישוב זווית היגוי בין מיקום הרובוט לנקודת היעד
@@ -29,6 +32,12 @@ def process_2(GPS,polygon_vertices,ArrayPoint1,ArrayPoint2, stop_flag):
             print("הרובוט מתקדם לנקודה הבאה")
         print("הרובוט הגיע ליעדו")
 
+        #שיערוך המיקום
+        KalmanFilter.process_3()
+        #קריאת מיקום הרובוט מהקובץ לאחר שמיקומו שוערך
+        x,y,speed=KalmanFilter.GPS_update()
+        current_point=[x,y]
+
         #היפוך הדגל
         flag_Array=3-flag_Array
         destination_point=ArrayPoint1[i] if flag_Array==1 else ArrayPoint2[i]
@@ -43,3 +52,9 @@ def process_2(GPS,polygon_vertices,ArrayPoint1,ArrayPoint2, stop_flag):
         time.sleep(2)
         destination_point=ArrayPoint1[i+1] if flag_Array==1 else ArrayPoint2[i+1]
         i+=1
+
+        # שיערוך המיקום
+        KalmanFilter.process_3()
+        # קריאת מיקום הרובוט מהקובץ לאחר שמיקומו שוערך
+        x, y, speed = KalmanFilter.GPS_update()
+        current_point = [x, y]

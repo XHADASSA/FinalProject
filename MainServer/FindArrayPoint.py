@@ -1,5 +1,6 @@
 import queue
 import math
+from Function import convert_queue_to_array
 
 polygon_vertices = [
     [5, 6],
@@ -201,8 +202,6 @@ def FindPoints(polygon_vertices, GPS, wavelength):
     polygon_vertices = polygon_vertices[IStartPoint:] + polygon_vertices[:IStartPoint]
 
     # חילוק מערך הנקודות לשתי מערכים שונים
-    first_half = []
-    second_half = []
     first_half = polygon_vertices[1:(len(polygon_vertices) // 2) + 1]
     second_half = polygon_vertices[(len(polygon_vertices) + 1) // 2:]
 
@@ -233,6 +232,9 @@ def FindPoints(polygon_vertices, GPS, wavelength):
     while not q2.empty():
         element = q2.get()
         ArrayPoint2.put(element)
+
+    ArrayPoint1=convert_queue_to_array(ArrayPoint1)
+    ArrayPoint2 = convert_queue_to_array(ArrayPoint2)
 
     return ArrayPoint1, ArrayPoint2
 

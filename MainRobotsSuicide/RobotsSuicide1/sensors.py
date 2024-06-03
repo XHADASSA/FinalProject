@@ -8,9 +8,9 @@ class Object:
         self.d = d
         self.angle = angle
 
-def sensor_update(i, sensor_array):
+def sensor_update(i, sensor_array,stop_event):
     print(f"Process {threading.get_ident()} updating sensor {i}")
-    while True:
+    while not stop_event.is_set():
     #for _ in range(3):
         signal = random.randint(0, 1)
         d = random.randint(0, 10000)
@@ -18,8 +18,8 @@ def sensor_update(i, sensor_array):
         sensor_array[i].d = d
         print(f"Process child {threading.get_ident()} - Signal: {sensor_array[i].signal}, d: {sensor_array[i].d}, angle: {sensor_array[i].angle}")
         time.sleep(1.5)
-def manager_sensor(sensor_array, stop_flag):
-    while True:
+def manager_sensor(sensor_array, stop_flag,stop_event):
+    while not stop_event.is_set():
         for i in range(10):
             #There is a mine in front of the robot! Obstacles must be activated.
             if sensor_array[i].signal == 1 and i == 2:
@@ -31,7 +31,7 @@ def manager_sensor(sensor_array, stop_flag):
         print(f"stop_flag in manager_sensor: {stop_flag.is_set()}")
         time.sleep(1.5)
 
-def process_1(stop_flag):
+def process_1(stop_flag,stop_event):
     processes = list(range(11))
     # יצירת מערך החיישנים המשותף לכלל התהליכים
     sensor_array = [
@@ -53,10 +53,10 @@ def process_1(stop_flag):
     print("sensors_process creating child processes")  # Added process start message
     for i in range(len(sensor_array)):  # Access object using enumerate
         #Create processes with sensor_updata from each object
-        p=threading.Thread(target=sensor_update, args=(i, sensor_array))
+        p=threading.Thread(target=sensor_update, args=(i, sensor_array,stop_event))
         processes[i]=p
         p.start()
-    p = threading.Thread(target=manager_sensor, args=(sensor_array,stop_flag))
+    p = threading.Thread(target=manager_sensor, args=(sensor_array,stop_flag,stop_event))
     processes[10]=p
     p.start()
 

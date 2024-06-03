@@ -1,6 +1,6 @@
 import time
-def process_4(stop_flag):
-    while True:
+def process_3(stop_flag,stop_event):
+    while not stop_event.is_set():
         stop_flag.wait()
         if stop_flag.is_set():
             # כל עוד דגל העצירה שווה ל1 סימן שמהחיישן הקידמי חוזר גל קול ויש מוקש ממול

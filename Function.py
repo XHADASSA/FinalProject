@@ -3,11 +3,10 @@ from queue import Queue
 import variables
 import MainServer.global_state as global_state
 
-
 #polygon_vertices = [
 #    [34,0],
 #    [0, 5],
-#    [0, 40],
+#    [1, 40],
 #    [20, 42],
 #    [40, 20]
 #    ]
@@ -31,8 +30,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     distance = radius * c
     return distance
 print(calculate_distance(1,11,1,1))
-def GPS():
-    return [0,0]
+
 
 # Check if a point is within the polygon boundary
 def is_within_polygon(lat, lon,polygon_vertices):
@@ -147,7 +145,7 @@ def solve_cos_equation(b, angle):
     c = b / math.cos(angle_rad)
 
 #    return c
-def FindPoint(i):
+def FindPoint(i,polygon_vertices):
     line_equation1 = find_line_equation(polygon_vertices[i],polygon_vertices[i+1])
     line_equation2 = find_line_equation(polygon_vertices[i], polygon_vertices[i - 1])
     #חישוב הזווית בין 2 המשוואות
@@ -234,10 +232,10 @@ def check_distance(point1, point2,b):
     # חשב את המרחק בין שתי הנקודות באמצעות נוסחת המרחק האוקלידי
     distance = math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
-    # Convert the distance to centimeters (assuming the input coordinates are in meters)
+    # המר את המרחק לסנטימטרים
     distance_cm = distance * 100
 
-    # Check if the distance is approximately 10 centimeters
+    # בדוק אם המרחק הוא כ-10 ס"מ
     if math.isclose(distance_cm, b, rel_tol=1e-02):
         return True
     else:
@@ -280,25 +278,8 @@ def convert_queue_to_array(queue):
     return array
 
 
-def GPS():
-    """
-    מוצא נקודה שמחוץ לצורה סגורה
-    :param polygon: רשימת נקודות היוצרות את הצורה
-    :return: נקודה (x, y) שמחוץ לצורה
-    """
-    # הפקת קואורדינטות ה-X וה-Y מהנקודות
-    x_coords = [point[0] for point in global_state.dataArray]
-    y_coords = [point[1] for point in global_state.dataArray]
-
-    # מציאת המקסימום והמינימום של קואורדינטות ה-X וה-Y
-    min_x, max_x = min(x_coords), max(x_coords)
-    min_y, max_y = min(y_coords), max(y_coords)
-
-    # הוספת נקודה מחוץ לטווח המינימום והמקסימום כדי להבטיח שהיא מחוץ לצורה
-    outside_point = (max_x + 1, max_y + 1)
-
-    return outside_point
-
+def Start_GPS():
+    return [0,0]
 
 def find_closest_point(target_point, points_array):
     """
@@ -318,7 +299,16 @@ def find_closest_point(target_point, points_array):
 
     return i
 
-## דוגמה לשימוש בפונקציה
-#polygon = [(0, 0), (4, 0), (4, 3), (2, 5), (0, 3)]  # מחומש
-#outside_point = GPS()
-#print(f"The outside point is: {outside_point}")
+def Checking_integrity_points(polygon_vertices):
+    n=len(polygon_vertices)
+    for i in range(n-1):
+        line_equation1=find_line_equation(polygon_vertices[i%n],polygon_vertices[(i+1)%n])
+        line_equation2 = find_line_equation(polygon_vertices[(i+2) % n], polygon_vertices[(i + 1) % n])
+        #print(f"the line equation: {line_equation1,line_equation2}")
+        angle=calculate_angle(line_equation1,line_equation2)
+        #print(f"angle of 3 point: {polygon_vertices[i%n], polygon_vertices[(i+1)%n], polygon_vertices[(i+2)%n]} is: {angle}")
+        if angle>180:
+            return False
+    return True
+
+#print(Checking_integrity_points([[0, 0], [1, 1], [1, 2], [2, 2], [3, 1], [2, 0], ]))

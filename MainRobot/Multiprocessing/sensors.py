@@ -46,29 +46,29 @@ def sensor_update(i, sensor_array):
 server_url = "http://localhost:3001/Main-robot"
 
 def manager_sensor(sensor_array, stop_flag):
-    #while True:
-    for i in range(10):
-        #There is a mine in front of the robot! Obstacles must be activated.
-        if sensor_array[i].signal and i == 1:
-            if sensor_array[i].type:
-                positionOfMine = CalculatingLocationMine(sensor_array[i].angle, sensor_array[i].d, [0, 0])
-                # שליחת המיקום לשרת הראשי
+    while True:
+        for i in range(10):
+            #There is a mine in front of the robot! Obstacles must be activated.
+            if sensor_array[i].signal and i == 1:
+                if sensor_array[i].type:
+                    positionOfMine = CalculatingLocationMine(sensor_array[i].angle, sensor_array[i].d, [0, 0])
+                    # שליחת המיקום לשרת הראשי
+                    data = {'waypoint': positionOfMine}
+                    response = requests.post(server_url, json=data)
+                    print(response)
+                    print("נשלח מיקום עצם חשוד לשרת הראשי")
+                stop_flag=1
+            #There is a mine in the area
+            elif sensor_array[i].signal and sensor_array[i].type:
+                #שליחת הודעה למסך כולל הנתונים של זווית, מרחק, ומיקום הרובוט
+                positionOfMine=CalculatingLocationMine(sensor_array[i].angle,sensor_array[i].d,[0,0])
+                #שליחת המיקום לשרת הראשי
                 data = {'waypoint': positionOfMine}
                 response = requests.post(server_url, json=data)
                 print(response)
                 print("נשלח מיקום עצם חשוד לשרת הראשי")
-            stop_flag=1
-        #There is a mine in the area
-        elif sensor_array[i].signal and sensor_array[i].type:
-            #שליחת הודעה למסך כולל הנתונים של זווית, מרחק, ומיקום הרובוט
-            positionOfMine=CalculatingLocationMine(sensor_array[i].angle,sensor_array[i].d,[0,0])
-            #שליחת המיקום לשרת הראשי
-            data = {'waypoint': positionOfMine}
-            response = requests.post(server_url, json=data)
-            print(response)
-            print("נשלח מיקום עצם חשוד לשרת הראשי")
-    print(f"stop_flag in manager_sensor: {stop_flag}")
-    time.sleep(1)
+        print(f"stop_flag in manager_sensor: {stop_flag}")
+        time.sleep(1)
 
 def process_1(stop_flag):
     processes = list(range(11))
@@ -86,7 +86,7 @@ def process_1(stop_flag):
         Object(False, False,0, 0)
     ]
 
-    angle_sensors=vl.read_angle_sensors_for_exel('../../data.xlsx')
+    angle_sensors=vl.read_angle_sensors_for_exel()
 
     for i in range(len(angle_sensors)):
         sensor_array[i].angle = angle_sensors[i]

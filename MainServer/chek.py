@@ -30,7 +30,7 @@ current_location = get_current_location_from_serial()
 if current_location:
     print(f"Current location is: Latitude {current_location[0]}, Longitude {current_location[1]}")
 else:
-    print("Unable to get the current location.")'''
+    print("Unable to get the current location.")
 
 import numpy as np
 import sys
@@ -96,11 +96,7 @@ class UserCode:
 
 
 def predictState(self, A, x):
-    '''
-    :param A: State-transition model matrix
-    :param x: Current state vector
-    :return x_p: Predicted state vector as 4x1 numpy array
-    '''
+
 
     # TODO: Predict the next state
     x_p = np.zeros((4, 1))
@@ -120,13 +116,6 @@ def calculateKalmanGain(self, sigma_p, H, R):
 
 
 def correctState(self, z, x_p, k, H):
-    '''
-    :param z: Measurement vector
-    :param x_p: Predicted state vector
-    :param k: Kalman gain
-    :param H: Observation model
-    :return x: Corrected state vector as 4x1 numpy array
-    '''
 
     # TODO: Correct the current state prediction with the measurement
     x = np.zeros((4, 1))
@@ -150,9 +139,7 @@ def state_callback(self):
 
 
 def measurement_callback(self, measurement):
-    '''
-    :param measurement: vector of measured coordinates
-    '''
+
 
     # visualize measurement
     # plot_point("gps", measurement)
@@ -178,4 +165,46 @@ measurement = read_measurment()
 print(kf.measurement_callback(measurement))
 # for i in range(10):
 # print(kf.measurement_callback([i,i+5]))
+'''
 
+import math
+
+
+def calculate_angle_between_lines(equation1, equation2):
+    # פרס את המשוואות ל-a, b, c
+    a1, b1, c1 = equation1
+    a2, b2, c2 = equation2
+
+    # חשב את השיפועים
+    if b1 != 0:
+        m1 = -a1 / b1
+    else:
+        m1 = float('inf')  # קו אנכי
+
+    if b2 != 0:
+        m2 = -a2 / b2
+    else:
+        m2 = float('inf')  # קו אנכי
+
+    if m1 == float('inf') and m2 == float('inf'):
+        theta = 0
+    elif m1 == float('inf'):
+        theta = math.pi / 2  # 90 מעלות
+    elif m2 == float('inf'):
+        theta = math.pi / 2  # 90 מעלות
+    else:
+        # חשב את הזווית ביניהם באמצעות נוסחת הטנגנס
+        tan_theta = abs((m1 - m2) / (1 + m1 * m2))
+        theta = math.atan(tan_theta)
+
+    # המרה לרדיאנים לזווית במעלות
+    angle_degrees = math.degrees(theta)
+
+    return angle_degrees
+
+
+# דוגמה לשימוש
+equation1 = (-1, 0, 1)
+equation2 = (1, -1, 0)
+angle = calculate_angle_between_lines(equation1, equation2)
+print("הזווית בין שני הישרים היא:", angle, "מעלות")
